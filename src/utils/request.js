@@ -3,24 +3,23 @@
 //导入axios  npm install axios
 import axios from "axios";
 import { ElMessage } from "element-plus";
+import { useUserStore } from '@/stores'
 //定义一个变量,记录公共的前缀  ,  baseURL
 const baseURL = "/api";
 const instance = axios.create({ baseURL });
 
-//添加请求拦截器
+// 请求拦截器
 instance.interceptors.request.use(
-    config => {
-        // 在发送请求之前做些什么
-        // 如: token 验证, 统一加上 token
-        // config.headers["Authorization"] = "Bearer " + localStorage.getItem("token");
-        return config;
+    (config) => {
+        // TODO 2. 携带token
+        const useStore = useUserStore()
+        if (useStore.token) {
+            config.headers.Authorization = useStore.token
+        }
+        return config
     },
-    err => {
-        // 对请求错误做些什么
-        ElMessage.error("网络异常");
-        return Promise.reject(err);
-    }
-);
+    (err) => Promise.reject(err)
+)
 
 //添加响应拦截器
 instance.interceptors.response.use(

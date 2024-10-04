@@ -2,16 +2,30 @@ import { createRouter, createWebHistory } from "vue-router";
 import Images from "@/views/Images.vue";
 import Annotation from "@/views/Annotation.vue";
 import Login from "@/views/Login.vue";
+import Layout from "@/views/Layout.vue";
+import UserProfile from "@/views/user/UserProfile.vue";
+import UserAvatar from "@/views/user/UserAvatar.vue";
+import UserPassword from "@/views/user/UserPassword.vue";
 
 // 定义路由关系
 const routes = [
     { path: "/", redirect: "/login" },
-    { path: "/images", component: Images },
     {
         path: "/login",
         name: "Login",
         component: Login
     },
+    {
+        path: "/layout",
+        name: "Layout",
+        component: Layout,
+        children: [
+            { path: "user/profile", component: UserProfile },
+            { path: "user/avatar", component: UserAvatar },
+            { path: "user/password", component: UserPassword },
+        ]
+    },
+    { path: "/images", component: Images },
     {
         path: "/annotation",
         name: "Annotation",
