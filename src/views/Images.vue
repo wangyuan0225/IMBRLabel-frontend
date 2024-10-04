@@ -88,7 +88,7 @@ onMounted(fetchImages);
       <el-main>
         <div class="upload-section">
           <el-upload :before-upload="beforeUpload">
-            <el-button type="primary">上传照片</el-button>
+            <el-button type="primary">上传图片</el-button>
           </el-upload>
         </div>
         <div class="gallery">

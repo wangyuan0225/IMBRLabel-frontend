@@ -1,10 +1,10 @@
 <script setup>
-import {userRegisterService, userLoginService} from "@/api/login";
-import {useUserStore} from "@/stores/user";
-import {useRouter} from "vue-router";
-import {User, Lock} from "@element-plus/icons-vue";
-import {ref, watch} from "vue";
-import {ElMessage} from "element-plus";
+import { userRegisterService, userLoginService } from "@/api/login";
+import { useUserStore } from "@/stores/user";
+import { useRouter } from "vue-router";
+import { User, Lock } from "@element-plus/icons-vue";
+import { ref, watch } from "vue";
+import { ElMessage } from "element-plus";
 //控制注册与登录表单的显示， 默认显示注册
 const isRegister = ref(false);
 const form = ref();
@@ -29,11 +29,11 @@ const formModel = ref({
 //        - callback(new Error(错误信息)) 校验失败
 const rules = {
   username: [
-    {required: true, message: "请输入用户名", trigger: "blur"},
-    {min: 5, max: 10, message: "用户名必须是 5-10位 的字符", trigger: "blur"}
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    { min: 5, max: 10, message: "用户名必须是 5-10位 的字符", trigger: "blur" }
   ],
   password: [
-    {required: true, message: "请输入密码", trigger: "blur"},
+    { required: true, message: "请输入密码", trigger: "blur" },
     {
       pattern: /^\S{6,15}$/,
       message: "密码必须是 6-15位 的非空字符",
@@ -41,7 +41,7 @@ const rules = {
     }
   ],
   repassword: [
-    {required: true, message: "请输入密码", trigger: "blur"},
+    { required: true, message: "请输入密码", trigger: "blur" },
     {
       pattern: /^\S{6,15}$/,
       message: "密码必须是 6-15位 的非空字符",
@@ -77,7 +77,7 @@ const login = async () => {
   const res = await userLoginService(formModel.value);
   userStore.setToken(res.data.token);
   ElMessage.success("登录成功");
-  await router.push("/");
+  await router.push("/layout");
 };
 
 // 切换的时候，重置表单内容
@@ -95,43 +95,22 @@ watch(isRegister, () => {
     <el-col :span="12" class="bg"></el-col>
     <el-col :span="6" :offset="3" class="form">
       <!-- 注册表单 -->
-      <el-form
-          :model='formModel'
-          :rules="rules"
-          ref="form" size="large" autocomplete="off" v-if="isRegister">
+      <el-form :model='formModel' :rules="rules" ref="form" size="large" autocomplete="off" v-if="isRegister">
         <el-form-item>
           <h1>注册</h1>
         </el-form-item>
         <el-form-item prop="username">
-          <el-input
-              v-model="formModel.username"
-              :prefix-icon="User"
-              placeholder="请输入用户名"
-          ></el-input>
+          <el-input v-model="formModel.username" :prefix-icon="User" placeholder="请输入用户名"></el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input
-              v-model="formModel.password"
-              :prefix-icon="Lock"
-              type="password"
-              placeholder="请输入密码"
-          ></el-input>
+          <el-input v-model="formModel.password" :prefix-icon="Lock" type="password" placeholder="请输入密码"></el-input>
         </el-form-item>
         <el-form-item prop="repassword">
-          <el-input
-              v-model="formModel.repassword"
-              :prefix-icon="Lock"
-              type="password"
-              placeholder="请输入再次密码"
-          ></el-input>
+          <el-input v-model="formModel.repassword" :prefix-icon="Lock" type="password" placeholder="请输入再次密码"></el-input>
         </el-form-item>
         <!-- 注册按钮 -->
         <el-form-item>
-          <el-button
-              @click="register"
-              class="button"
-              type="primary"
-              auto-insert-space>
+          <el-button @click="register" class="button" type="primary" auto-insert-space>
             注册
           </el-button>
         </el-form-item>
@@ -142,31 +121,16 @@ watch(isRegister, () => {
         </el-form-item>
       </el-form>
       <!-- 登录表单 -->
-      <el-form
-          :model="formModel"
-          :rules="rules"
-          ref="form"
-          size="large"
-          autocomplete="off"
-          v-else>
+      <el-form :model="formModel" :rules="rules" ref="form" size="large" autocomplete="off" v-else>
         <el-form-item>
           <h1>登录</h1>
         </el-form-item>
         <el-form-item prop="username">
-          <el-input
-              v-model="formModel.username"
-              :prefix-icon="User"
-              placeholder="请输入用户名"
-          ></el-input>
+          <el-input v-model="formModel.username" :prefix-icon="User" placeholder="请输入用户名"></el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input
-              v-model="formModel.password"
-              name="password"
-              :prefix-icon="Lock"
-              type="password"
-              placeholder="请输入密码"
-          ></el-input>
+          <el-input v-model="formModel.password" name="password" :prefix-icon="Lock" type="password"
+            placeholder="请输入密码"></el-input>
         </el-form-item>
         <el-form-item class="flex">
           <div class="flex">
@@ -176,14 +140,8 @@ watch(isRegister, () => {
         </el-form-item>
         <!-- 登录按钮 -->
         <el-form-item>
-          <el-button
-              @click="login"
-              class="button"
-              type="primary"
-              auto-insert-space
-          >登录
-          </el-button
-          >
+          <el-button @click="login" class="button" type="primary" auto-insert-space>登录
+          </el-button>
         </el-form-item>
         <el-form-item class="flex">
           <el-link type="info" :underline="false" @click="isRegister = true">
