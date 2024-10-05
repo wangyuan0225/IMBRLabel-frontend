@@ -72,13 +72,33 @@ const register = async () => {
 const userStore = useUserStore();
 const router = useRouter();
 
+const rememberMe = ref(false); // 用于跟踪“记住我”复选框的状态
+
 const login = async () => {
   await form.value.validate();
   const res = await userLoginService(formModel.value);
   userStore.setToken(res.data.token);
+
+  // 如果“记住我”被勾选，将用户名和 token 保存到 localStorage
+  if (rememberMe.value) {
+    localStorage.setItem("username", formModel.value.username);
+    localStorage.setItem("token", res.data.token);
+  } else {
+    sessionStorage.setItem("username", formModel.value.username);
+    sessionStorage.setItem("token", res.data.token);
+  }
+
   ElMessage.success("登录成功");
   await router.push("/layout");
 };
+
+// 进入页面时检查是否有保存的用户名和 token，并自动填充表单
+if (localStorage.getItem("username")) {
+  formModel.value.username = localStorage.getItem("username");
+  userStore.setToken(localStorage.getItem("token"));
+  await router.push("/layout");
+}
+
 
 // 切换的时候，重置表单内容
 watch(isRegister, () => {
@@ -134,7 +154,7 @@ watch(isRegister, () => {
         </el-form-item>
         <el-form-item class="flex">
           <div class="flex">
-            <el-checkbox>记住我</el-checkbox>
+            <el-checkbox v-model="rememberMe">记住我</el-checkbox>
             <el-link type="primary" :underline="false">忘记密码？</el-link>
           </div>
         </el-form-item>

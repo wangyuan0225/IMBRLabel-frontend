@@ -3,7 +3,6 @@ import {
   Promotion,
   UserFilled,
   User,
-  Crop,
   EditPen,
   SwitchButton,
   CaretBottom
@@ -22,7 +21,7 @@ onMounted(() => {
 })
 
 // 根据路由判断是否隐藏背景图片
-const isAvatarPage = computed(() => route.path === '/layout/user/avatar'||route.path === '/layout/user/password'||route.path === '/layout/user/profile')
+const isAvatarPage = computed(() => route.path === '/layout/user/password'||route.path === '/layout/user/profile')
 
 const handleCommand = async (key) => {
   if (key === 'logout') {
@@ -72,12 +71,6 @@ const handleCommand = async (key) => {
             </el-icon>
             <span>基本资料</span>
           </el-menu-item>
-          <el-menu-item index="/layout/user/avatar">
-            <el-icon>
-              <Crop />
-            </el-icon>
-            <span>更换头像</span>
-          </el-menu-item>
           <el-menu-item index="/layout/user/password">
             <el-icon>
               <EditPen />
@@ -104,7 +97,6 @@ const handleCommand = async (key) => {
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="profile" :icon="User">基本资料</el-dropdown-item>
-              <el-dropdown-item command="avatar" :icon="Crop">更换头像</el-dropdown-item>
               <el-dropdown-item command="password" :icon="EditPen">重置密码</el-dropdown-item>
               <el-dropdown-item command="logout" :icon="SwitchButton">退出登录</el-dropdown-item>
             </el-dropdown-menu>
