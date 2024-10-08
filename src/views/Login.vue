@@ -5,6 +5,7 @@ import { useRouter } from "vue-router";
 import { User, Lock } from "@element-plus/icons-vue";
 import { ref, watch } from "vue";
 import { ElMessage } from "element-plus";
+import { onMounted } from 'vue';
 //控制注册与登录表单的显示， 默认显示注册
 const isRegister = ref(false);
 const form = ref();
@@ -92,12 +93,18 @@ const login = async () => {
   await router.push("/layout");
 };
 
+// 获取用户信息
+await userStore.getUser();
+
 // 进入页面时检查是否有保存的用户名和 token，并自动填充表单
-if (localStorage.getItem("username")) {
-  formModel.value.username = localStorage.getItem("username");
-  userStore.setToken(localStorage.getItem("token"));
-  await router.push("/layout");
-}
+onMounted(async () => {
+  if (localStorage.getItem("username")) {
+    formModel.value.username = localStorage.getItem("username");
+    userStore.setToken(localStorage.getItem("token"));
+    await router.push("/layout");
+  }
+});
+
 
 
 // 切换的时候，重置表单内容
