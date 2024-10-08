@@ -96,9 +96,6 @@ const login = async () => {
   await router.push("/layout");
 };
 
-const goToResetPassword = () => {
-  router.push("/resetpassword");
-};
 
 // 进入页面时检查是否有保存的用户名和 token，并自动填充表单
 onMounted(async () => {
@@ -165,7 +162,7 @@ watch(isRegister, () => {
         <el-form-item class="flex">
           <div class="flex">
             <el-checkbox v-model="rememberMe">记住我</el-checkbox>
-            <el-link type="primary" :underline="false" @click="goToResetPassword">忘记密码？</el-link>
+            <el-link type="primary" :underline="false">忘记密码？</el-link>
           </div>
         </el-form-item>
         <!-- 登录按钮 -->
