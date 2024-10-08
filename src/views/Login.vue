@@ -80,6 +80,9 @@ const login = async () => {
   const res = await userLoginService(formModel.value);
   userStore.setToken(res.data.token);
 
+  // 获取用户信息
+  await userStore.getUser();
+
   // 如果“记住我”被勾选，将用户名和 token 保存到 localStorage
   if (rememberMe.value) {
     localStorage.setItem("username", formModel.value.username);
@@ -93,8 +96,9 @@ const login = async () => {
   await router.push("/layout");
 };
 
-// 获取用户信息
-await userStore.getUser();
+const goToResetPassword = () => {
+  router.push("/resetpassword");
+};
 
 // 进入页面时检查是否有保存的用户名和 token，并自动填充表单
 onMounted(async () => {
@@ -104,7 +108,6 @@ onMounted(async () => {
     await router.push("/layout");
   }
 });
-
 
 
 // 切换的时候，重置表单内容
@@ -162,7 +165,7 @@ watch(isRegister, () => {
         <el-form-item class="flex">
           <div class="flex">
             <el-checkbox v-model="rememberMe">记住我</el-checkbox>
-            <el-link type="primary" :underline="false">忘记密码？</el-link>
+            <el-link type="primary" :underline="false" @click="goToResetPassword">忘记密码？</el-link>
           </div>
         </el-form-item>
         <!-- 登录按钮 -->
