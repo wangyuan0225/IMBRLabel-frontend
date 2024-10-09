@@ -32,15 +32,15 @@ export const useUserStore = defineStore('big-user', () => {
 
   const setUser = (obj) => {
     user.value = obj;
-    setUsername(obj.username);
+    setUserid(obj.userid);
   };
 
   return {
     token,
-    username,
+    userid,
     setToken,
     removeToken,
-    setUsername,
+    setUserid,
     user,
     getUser,
     setUser,
