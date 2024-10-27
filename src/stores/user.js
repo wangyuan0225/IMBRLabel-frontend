@@ -45,4 +45,8 @@ export const useUserStore = defineStore('big-user', () => {
     getUser,
     setUser,
   };
+}, {
+  persist: {
+    paths: ['token'] // 持久化 token
+  }
 });
