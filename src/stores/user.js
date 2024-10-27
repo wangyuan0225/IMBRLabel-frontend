@@ -23,8 +23,13 @@ export const useUserStore = defineStore('big-user', () => {
   const getUser = async () => {
     try {
       const res = await userGetInfoService();
-      user.value = res.data.data;
-      setUserid(user.value.user_id);
+      console.log('API响应:', res); // 添加日志查看响应内容
+      if (res && res.data) {
+        user.value = res.data;
+        setUserid(user.value.user_id);
+      } else {
+        console.error('API响应结构不正确:', res);
+      }
     } catch (error) {
       console.error('获取用户信息失败:', error);
     }
