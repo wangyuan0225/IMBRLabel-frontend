@@ -40,14 +40,11 @@ const beforeUpload = async (file) => {
 
 const editImage = (image) => {
   console.log("edit image", image);
-  // 使用查询参数传递图片路径
+  // 使用参数传递图片路径
   router.push({
     name: "Annotation",
     query: {
-      imagePath: encodeURIComponent(image.path), // 编码路径以处理特殊字符
-      imageId: image.id, // 传递 imageId
-      imageName: image.name,
-      annotations: image.annotations // 传递标注数据
+      imageId: image.id // 仅传递 imageId
     }
   });
 };
@@ -160,4 +157,3 @@ onMounted(fetchImages);
   color: white;
 }
 </style>
-
