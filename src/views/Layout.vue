@@ -38,7 +38,7 @@ const handleCommand = async (key) => {
     await router.push('/login')
   } else {
     // 跳转操作
-    await router.push(`/user/${key}`)
+    await router.push(`/layout/user/${key}`)
   }
 }
 </script>
