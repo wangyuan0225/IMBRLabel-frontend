@@ -5,7 +5,7 @@ export const addAnnotationToImage = (imageId, annotations) => {
     return request.patch("/annotations", null, {
         params: {
             imageId: imageId,
-            annotations: annotations,
+            annotations: annotations
         }
     });
 };
@@ -26,5 +26,14 @@ export function exportAnnotations(imageId, type) {
             imageId: imageId,
             type: type
         }
-    })
+    });
+}
+
+// 根据坐标添加标注
+export function autoAnnotation(annotations) {
+    return request.patch("/annotations/auto", null, {
+        params: {
+            annotations: annotations
+        }
+    });
 }

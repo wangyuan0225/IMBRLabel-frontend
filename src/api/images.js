@@ -16,6 +16,7 @@ export const uploadImage = (imageFile) => {
     });
 }
 
+// 删除图片
 export function deleteImageById(id) {
     return request.delete(`/images?id=${id}`);
 }

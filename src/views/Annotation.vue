@@ -2,7 +2,7 @@
 import { onMounted, ref, onBeforeUnmount, watch } from "vue";
 import { useRoute, useRouter } from "vue-router"; // 引入 useRouter
 import CanvasSelect from "canvas-select";
-import { addAnnotation, addAnnotationToImage, exportAnnotations, getTemplates } from "@/api/annotation.js";
+import { addAnnotation, autoAnnotation, addAnnotationToImage, exportAnnotations, getTemplates } from "@/api/annotation.js";
 import { ElMessage } from "element-plus";
 import { FullScreen, Hide, Pointer, Upload } from "@element-plus/icons-vue";
 
@@ -231,6 +231,43 @@ function applyTemplate(template) {
   }
 }
 
+// 添加标注到图片
+function autoAddAnnotation() {
+  console.log("Adding annotations to image", annotations.value);
+  autoAnnotation(encodeURIComponent(JSON.stringify(annotations.value))).then(response => {
+    if (response && response.data) {
+      console.log("Full response:", response);
+
+      let data;
+      if (typeof response.data === 'string') {
+        try {
+          data = JSON.parse(response.data);
+          console.log("Parsed response data:", data);
+        } catch (error) {
+          console.error("Failed to parse response data:", error);
+          ElMessage.error('解析响应数据失败');
+          return;
+        }
+      } else {
+        data = response.data;
+      }
+
+      if (data) {
+        console.log("Annotations added:", data);
+        annotations.value = data;
+        instance.setData(annotations.value);
+        ElMessage.success('标注已成功添加');
+        // 更新 route.query.imagePath
+        const newAnnotations = encodeURIComponent(JSON.stringify(annotations.value));
+        router.replace({ query: { ...route.query, annotations: newAnnotations } });
+      }
+    }
+  }).catch(error => {
+    console.error("Error adding annotations:", error);
+    ElMessage.error('添加标注失败');
+  });
+}
+
 // Watch for changes in label
 watch(() => selectedShape.value?.label, (newVal) => {
   if (selectedShape.value) {
@@ -284,6 +321,8 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
           <el-button @click="exportJson()">导出为json</el-button>
           <el-button @click="exportXml()">导出为xml</el-button>
           <el-button @click="exportCsv()">导出为csv</el-button>
+          <!-- 新增按钮 -->
+          <el-button @click="autoAddAnnotation()">自动添加标注</el-button>
         </div>
       </el-header>
       <el-container>
@@ -361,3 +400,4 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
 }
 
 </style>
+
