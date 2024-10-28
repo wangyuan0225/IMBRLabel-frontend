@@ -35,10 +35,10 @@ const handleCommand = async (key) => {
     // 清除本地的数据 (token + user信息)
     userStore.removeToken()
     userStore.setUser({})
-    router.push('/login')
+    await router.push('/login')
   } else {
     // 跳转操作
-    router.push(`/user/${key}`)
+    await router.push(`/user/${key}`)
   }
 }
 </script>

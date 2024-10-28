@@ -3,6 +3,7 @@ import PageContainer from '@/components/PageContainer.vue'
 import { ref } from 'vue'
 import { useUserStore } from '@/stores'
 import { userUpdateInfoService } from '@/api/user'
+import {ElMessage} from "element-plus";
 
 const formRef = ref()
 
@@ -44,7 +45,7 @@ const submitForm = async () => {
   // 提交修改
   await userUpdateInfoService(form.value)
   // 通知 user 模块，进行数据的更新
-  getUser()
+  await getUser()
   // 提示用户
   ElMessage.success('修改成功')
 }

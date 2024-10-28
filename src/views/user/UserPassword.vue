@@ -4,6 +4,7 @@ import PageContainer from '@/components/PageContainer.vue'
 import { userUpdatePasswordService } from '@/api/user'
 import { useUserStore } from '@/stores'
 import { useRouter } from 'vue-router'
+import {ElMessage} from "element-plus";
 
 const formRef = ref()
 const pwdForm = ref({
@@ -59,7 +60,7 @@ const submitForm = async () => {
   userStore.setUser({})
 
   // 拦截登录
-  router.push('/login')
+  await router.push('/login')
 }
 
 const resetForm = () => {
