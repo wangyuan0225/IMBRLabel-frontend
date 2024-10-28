@@ -11,6 +11,7 @@ import avatar from '@/assets/default.png'
 import { useUserStore } from '@/stores'
 import { onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { ElMessageBox } from 'element-plus';
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -21,7 +22,7 @@ onMounted(() => {
 })
 
 // 根据路由判断是否隐藏背景图片
-const isAvatarPage = computed(() => route.path === '/layout/user/password'||route.path === '/layout/user/profile')
+const isAvatarPage = computed(() => route.path === '/layout/user/password' || route.path === '/layout/user/profile')
 
 const handleCommand = async (key) => {
   if (key === 'logout') {
