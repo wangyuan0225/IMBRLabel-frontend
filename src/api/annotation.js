@@ -2,10 +2,12 @@ import request from "@/utils/request.js";
 
 // 添加标注到图片
 export const addAnnotationToImage = (imageId, annotations) => {
-    return request.patch("/annotations", null, {
-        params: {
-            imageId: imageId,
-            annotations: annotations
+    return request.patch("/annotations", {
+        imageId: imageId,
+        annotations: annotations
+    }, {
+        headers: {
+            'Content-Type': 'application/json'
         }
     });
 };
@@ -31,9 +33,11 @@ export function exportAnnotations(imageId, type) {
 
 // 根据坐标添加标注
 export function autoAnnotation(annotations) {
-    return request.patch("/annotations/auto", null, {
-        params: {
-            annotations: annotations
+    return request.patch("/annotations/auto", {
+        annotations: annotations
+    }, {
+        headers: {
+            'Content-Type': 'application/json'
         }
     });
 }
