@@ -1,13 +1,14 @@
 <script setup>
-import {onMounted, ref, onBeforeUnmount, watch} from "vue";
-import {useRoute} from "vue-router";
+import { onMounted, ref, onBeforeUnmount, watch } from "vue";
+import { useRoute, useRouter } from "vue-router"; // 引入 useRouter
 import CanvasSelect from "canvas-select";
-import {addAnnotation, addAnnotationToImage, exportAnnotations, getTemplates} from "@/api/annotation.js";
-import {ElMessage} from "element-plus";
-import {FullScreen, Hide, Pointer, Upload} from "@element-plus/icons-vue";
+import { addAnnotation, addAnnotationToImage, exportAnnotations, getTemplates } from "@/api/annotation.js";
+import { ElMessage } from "element-plus";
+import { FullScreen, Hide, Pointer, Upload } from "@element-plus/icons-vue";
 
 let instance;
 const route = useRoute();
+const router = useRouter(); // 使用 useRouter
 const imagePath = ref(decodeURIComponent(route.query.imagePath));
 const imageId = ref(route.query.imageId);
 const imageName = ref(route.query.imageName);
@@ -156,6 +157,9 @@ function onFocus() {
 function update() {
   addAnnotationToImage(imageId.value, encodeURIComponent(JSON.stringify(annotations.value)));
   ElMessage.success("标注数据已保存");
+  // 更新 route.query.imagePath
+  const newAnnotations = encodeURIComponent(JSON.stringify(annotations.value));
+  router.replace({ query: { ...route.query, annotations: newAnnotations } });
 }
 
 function exportJson() {
