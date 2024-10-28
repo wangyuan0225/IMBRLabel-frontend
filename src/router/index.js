@@ -29,10 +29,7 @@ const routes = [
         name: "Annotation",
         component: Annotation,
         props: route => ({
-            imagePath: route.query.imagePath,
-            imageId: route.query.imageId,
-            imageName: route.query.imageName,
-            annotations: route.query.annotations
+            imageId: route.query.imageId
         })
     }
 ];

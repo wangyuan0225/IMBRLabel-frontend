@@ -41,3 +41,11 @@ export function autoAnnotation(annotations) {
         }
     });
 }
+
+export function getImageDetails(imageId) {
+    return request.get("/annotations/details", {
+        params: {
+            imageId: imageId
+        }
+    });
+}
