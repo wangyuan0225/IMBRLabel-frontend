@@ -4,7 +4,7 @@ import { useRoute, useRouter } from "vue-router"; // 引入 useRouter
 import CanvasSelect from "canvas-select";
 import { addAnnotation, autoAnnotation, addAnnotationToImage, exportAnnotations, getTemplates } from "@/api/annotation.js";
 import { ElMessage } from "element-plus";
-import { FullScreen, Hide, Pointer, Upload } from "@element-plus/icons-vue";
+import { FullScreen, Hide, Pointer, Upload, Star } from "@element-plus/icons-vue";
 
 let instance;
 const route = useRoute();
@@ -111,9 +111,9 @@ function saveHistory() {
     output: outputRef.value ? outputRef.value : ""
   };
   if (
-      history.value.length === 0 ||
-      JSON.stringify(history.value[history.value.length - 1]) !==
-      JSON.stringify(currentState)
+    history.value.length === 0 ||
+    JSON.stringify(history.value[history.value.length - 1]) !==
+    JSON.stringify(currentState)
   ) {
     history.value.push(currentState);
     redoStack.value = [];
@@ -177,7 +177,7 @@ function exportCsv() {
 function handleExport(type) {
   exportAnnotations(imageId.value, type).then(result => {
     console.log(result);
-    const blob = new Blob([result.data], {type: "text/plain;charset=utf-8"});
+    const blob = new Blob([result.data], { type: "text/plain;charset=utf-8" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     console.log(imageName.value);
@@ -309,20 +309,20 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
           <el-button @click="change(3)" :type="createType === 3 ? 'primary' : 'default'">点</el-button>
           <el-button @click="change(4)" :type="createType === 4 ? 'primary' : 'default'">线</el-button>
           <el-button @click="change(5)" :type="createType === 5 ? 'primary' : 'default'">圆</el-button>
-          <el-button @click="change(0)" :type="createType === 0 ? 'primary' : 'default'" :icon="Pointer" ></el-button>
+          <el-button @click="change(0)" :type="createType === 0 ? 'primary' : 'default'" :icon="Pointer"></el-button>
           <el-button :icon="FullScreen" @click="fitting()"></el-button>
-          <el-button
-              @click="onFocus()"
-              :icon="Hide"
-              :type="isHidden ? 'primary' : 'default'"
-          >
-          </el-button>
+          <el-button @click="onFocus()" :icon="Hide" :type="isHidden ? 'primary' : 'default'"></el-button>
           <el-button :icon="Upload" type="success" @click="update()"></el-button>
           <el-button @click="exportJson()">导出为json</el-button>
           <el-button @click="exportXml()">导出为xml</el-button>
           <el-button @click="exportCsv()">导出为csv</el-button>
-          <!-- 新增按钮 -->
-          <el-button @click="autoAddAnnotation()">自动添加标注</el-button>
+          <el-button type="danger" @click="autoAddAnnotation()"
+            style="font-size: 24px; background-color: darkorange; color: white;">
+            <el-icon>
+              <Star />
+            </el-icon>
+            AI
+          </el-button>
         </div>
       </el-header>
       <el-container>
@@ -335,39 +335,41 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
             </div>
             <div class="right">
               <div v-if="selectedShape">
-                <h3>编辑标注属性值</h3>
-                <div style="margin-bottom: 10px">
-                  <label style="margin-right: 25px;">标签:</label>
-                  <el-input v-model="selectedShape.label" clearable style="width: 150px;"/>
-                </div>
-                <div style="margin-bottom: 10px">
-                  <label style="margin-right: 10px;">边线颜色:</label>
-                  <el-color-picker v-model="selectedShape.strokeStyle" show-alpha style="margin-right: 30px;"/>
+                <h3 class="center-title">编辑标注属性值</h3>
+                <el-form label-width="100px" class="left-form">
+                  <el-form-item label="标签名称:">
+                    <el-input v-model="selectedShape.label" clearable style="width: 150px;" />
+                  </el-form-item>
 
-                  <label style="margin-right: 10px;">填充颜色:</label>
-                  <el-color-picker v-model="selectedShape.fillStyle" show-alpha/>
-                </div>
-                <div style="margin-bottom: 10px">
-                  <label style="margin-right: 10px;">边线宽度:</label>
-                  <el-input-number v-model="selectedShape.lineWidth"/>
-                </div>
-                <div style="margin-bottom: 10px">
-                  <label style="margin-right: 10px;">模板名:</label>
-                  <el-input v-model="templateName" clearable style="width: 200px">
-                    <!-- 后置按钮 -->
-                    <template #append>
-                      <el-button @click="saveAsTemplate()" :icon="Upload"/>
-                    </template>
-                  </el-input>
-                </div>
-                <div>
-                  <h3>模板列表</h3>
-                  <ul>
-                    <li v-for="template in templates" :key="template.id" @click="applyTemplate(template)">
-                      {{ template.name }}
-                    </li>
-                  </ul>
-                </div>
+                  <el-form-item label="边线颜色:">
+                    <el-color-picker v-model="selectedShape.strokeStyle" show-alpha />
+                  </el-form-item>
+
+                  <el-form-item label="填充颜色:">
+                    <el-color-picker v-model="selectedShape.fillStyle" show-alpha />
+                  </el-form-item>
+
+                  <el-form-item label="边线宽度:">
+                    <el-input-number v-model="selectedShape.lineWidth" />
+                  </el-form-item>
+
+                  <el-form-item label="模板名称:">
+                    <el-input v-model="templateName" clearable style="width: 200px">
+                      <template #append>
+                        <el-button @click="saveAsTemplate()" :icon="Upload" />
+                      </template>
+                    </el-input>
+                  </el-form-item>
+                </el-form>
+
+                <h3 class="center-title">模板列表</h3>
+                <el-list>
+                  <el-list-item v-for="template in templates" :key="template.id" @click="applyTemplate(template)">
+                    <el-card>
+                      <div>{{ template.name }}</div>
+                    </el-card>
+                  </el-list-item>
+                </el-list>
               </div>
             </div>
           </div>
@@ -380,7 +382,8 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
 <style scoped>
 .common-layout {
   background-color: white;
-  min-height: 100vh; /* 保证背景色铺满整个页面 */
+  min-height: 100vh;
+  /* 保证背景色铺满整个页面 */
   padding: 0;
   margin: 0;
 }
@@ -392,12 +395,57 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
 .container {
   background-color: #ccc;
   width: 1200px;
+  /* 确保画布宽度适应页面 */
   height: 800px;
 }
 
 .right {
   margin-left: 20px;
+  max-width: 400px;
+  /* 限制右侧面板的最大宽度 */
+  transition: box-shadow 0.3s;
+  /* 添加过渡效果 */
 }
 
-</style>
+.right:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  /* 悬停时的阴影效果 */
+}
 
+.center-title {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.left-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  /* 确保左对齐 */
+}
+
+.el-form-item {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.el-list-item {
+  cursor: pointer;
+}
+
+.el-list-item:hover {
+  background-color: #f0f0f0;
+}
+
+.el-card {
+  width: 100%;
+  margin: 5px 0;
+  transition: background-color 0.2s;
+}
+
+.el-card:hover {
+  background-color: #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* 卡片悬停时的阴影效果 */
+}
+</style>

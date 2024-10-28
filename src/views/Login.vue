@@ -162,7 +162,6 @@ watch(isRegister, () => {
         <el-form-item class="flex">
           <div class="flex">
             <el-checkbox v-model="rememberMe">记住我</el-checkbox>
-            <el-link type="primary" :underline="false">忘记密码？</el-link>
           </div>
         </el-form-item>
         <!-- 登录按钮 -->
