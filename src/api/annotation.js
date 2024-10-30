@@ -34,18 +34,12 @@ export function exportAnnotations(imageId, type) {
 // 根据坐标添加标注
 export function autoAnnotation(annotations) {
     return request.patch("/annotations/auto", {
-        annotations: annotations
+        annotations: annotations,
+        polygonSides: polygonSides
+
     }, {
         headers: {
             'Content-Type': 'application/json'
-        }
-    });
-}
-
-export function getImageDetails(imageId) {
-    return request.get("/annotations/details", {
-        params: {
-            imageId: imageId
         }
     });
 }

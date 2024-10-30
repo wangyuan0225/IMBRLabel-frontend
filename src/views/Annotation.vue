@@ -1,18 +1,17 @@
 <script setup>
-import {onMounted, ref, onBeforeUnmount, watch} from "vue";
-import {useRoute, useRouter} from "vue-router"; // 引入 useRouter
+import { onMounted, ref, onBeforeUnmount, watch } from "vue";
+import { useRoute, useRouter } from "vue-router"; // 引入 useRouter
 import CanvasSelect from "canvas-select";
-
-import { addAnnotation, autoAnnotation, addAnnotationToImage, exportAnnotations, getTemplates, getImageDetails } from "@/api/annotation.js";
+import { addAnnotation, autoAnnotation, addAnnotationToImage, exportAnnotations, getTemplates } from "@/api/annotation.js";
 import { ElMessage } from "element-plus";
 import { FullScreen, Hide, Pointer, Upload, Star } from "@element-plus/icons-vue";
 
 let instance;
 const route = useRoute();
 const router = useRouter(); // 使用 useRouter
-const imagePath = ref("");
+const imagePath = ref(decodeURIComponent(route.query.imagePath));
 const imageId = ref(route.query.imageId);
-const imageName = ref("");
+const imageName = ref(route.query.imageName);
 
 // 初始化已有的标注信息
 let outputRef = ref(null);
@@ -25,78 +24,55 @@ const templateName = ref(""); // 模板名
 const isHidden = ref(false);
 // 定义createType，用于追踪当前绘制类型
 const createType = ref(0);
+const polygonSides = ref(20); // 默认多边形的边数为20
 
 let saveHistoryTimeout = null; // 保存历史记录的防抖定时器
 
 onMounted(() => {
-  getImageDetails(imageId.value).then(response => {
-    console.log("Response data:", response.data); // 打印响应数据
+  instance = new CanvasSelect(".container", imagePath.value);
+  instance.labelMaxLen = 10;
 
-    imagePath.value = response.data.path;
-    imageName.value = response.data.name;
-    annotations.value = response.data.annotations;
+  // 初始化 annotations，确保它是一个数组
+  if (route.query.annotations) {
+    instance.setData(JSON.parse(decodeURIComponent(route.query.annotations))); // 传递标注数据给 CanvasSelect
+  } else {
+    instance.setData([]);
+  }
 
-    console.log("imagePath.value", imagePath.value);
+  // 初始化 createType
+  createType.value = instance.createType;
 
-    // 初始化 CanvasSelect 实例
-    const fullImagePath = `http://localhost:8080/images/${imagePath.value}`;
-    instance = new CanvasSelect(".container", fullImagePath);
-    instance.labelMaxLen = 10;
+  // 获取模板列表
+  fetchTemplates();
+  // 更新 output 内容
+  updateOutput();
 
-    // 初始化 annotations，确保它是一个数组
-    if (annotations.value && annotations.value.trim() !== "") {
-      try {
-        // 先解码，再解析 JSON 字符串
-        const decodedAnnotations = decodeURIComponent(annotations.value);
-        const parsedAnnotations = JSON.parse(decodedAnnotations);
-        instance.setData(parsedAnnotations); // 传递标注数据给 CanvasSelect
-      } catch (error) {
-        console.error("Failed to parse annotations:", error);
-        instance.setData([]); // 如果解析失败，使用空数组
-      }
-    } else {
-      instance.setData([]); // 如果 annotations.value 为空，使用空数组
-    }
-
-    // 初始化 createType
-    createType.value = instance.createType;
-
-    // 获取模板列表
-    fetchTemplates();
-    // 更新 output 内容
-    updateOutput();
-
-    // 监听 createType 变化
-    instance.on("typeChange", (type) => {
-      createType.value = type;
-    });
-
-    instance.on("load", (src) => {
-      console.log("image loaded", src);
-    });
-    instance.on("add", (info) => {
-      console.log("add", info);
-      triggerSaveHistory();
-    });
-    instance.on("delete", (info) => {
-      console.log("delete", info);
-      triggerSaveHistory();
-    });
-    instance.on("select", (shape) => {
-      selectedShape.value = shape;
-    });
-    instance.on("updated", (result) => {
-      annotations.value = result;
-      triggerSaveHistory();
-      updateOutput(); // 更新 output 内容
-    });
-
-    window.addEventListener("keydown", handleKeyDown);
-
-  }).catch(error => {
-    console.error("Error fetching image details:", error);
-    ElMessage.error("获取图片详情失败");
+  // 监听 createType 变化
+  instance.on("typeChange", (type) => {
+    createType.value = type;
   });
+
+  instance.on("load", (src) => {
+    console.log("image loaded", src);
+  });
+  instance.on("add", (info) => {
+    console.log("add", info);
+    triggerSaveHistory();
+  });
+  instance.on("delete", (info) => {
+    console.log("delete", info);
+    triggerSaveHistory();
+  });
+  instance.on("select", (shape) => {
+    selectedShape.value = shape;
+  });
+  instance.on("updated", (result) => {
+    annotations.value = result;
+    triggerSaveHistory();
+    updateOutput(); // 更新 output 内容
+  });
+
+  window.addEventListener("keydown", handleKeyDown);
 });
 
 onBeforeUnmount(() => {
@@ -182,6 +158,9 @@ function onFocus() {
 function update() {
   addAnnotationToImage(imageId.value, encodeURIComponent(JSON.stringify(annotations.value)));
   ElMessage.success("标注数据已保存");
+  // 更新 route.query.imagePath
+  const newAnnotations = encodeURIComponent(JSON.stringify(annotations.value));
+  router.replace({ query: { ...route.query, annotations: newAnnotations } });
 }
 
 function exportJson() {
@@ -256,18 +235,21 @@ function applyTemplate(template) {
 // 添加标注到图片
 function autoAddAnnotation() {
   console.log("Adding annotations to image", annotations.value);
-  autoAnnotation(encodeURIComponent(JSON.stringify(annotations.value))).then(response => {
+  autoAnnotation(
+    encodeURIComponent(JSON.stringify(annotations.value)),
+    polygonSides.value // 传入 polygonSides 参数
+  ).then(response => {
     if (response && response.data) {
       console.log("Full response:", response);
 
       let data;
-      if (typeof response.data === "string") {
+      if (typeof response.data === 'string') {
         try {
           data = JSON.parse(response.data);
           console.log("Parsed response data:", data);
         } catch (error) {
           console.error("Failed to parse response data:", error);
-          ElMessage.error("解析响应数据失败");
+          ElMessage.error('解析响应数据失败');
           return;
         }
       } else {
@@ -276,16 +258,25 @@ function autoAddAnnotation() {
 
       if (data) {
         console.log("Annotations added:", data);
-        annotations.value = data;
+        annotations.value = data.annotations || []; // 确保 data.annotations 包含标注信息
         instance.setData(annotations.value);
-        ElMessage.success("标注已成功添加");
+
+        // 如果后端返回更新后的 polygonSides 值，可以在此更新
+        polygonSides.value = data.polygonSides || polygonSides.value;
+
+        ElMessage.success('标注已成功添加');
+
+        // 更新 route.query.annotations
+        const newAnnotations = encodeURIComponent(JSON.stringify(annotations.value));
+        router.replace({ query: { ...route.query, annotations: newAnnotations } });
       }
     }
   }).catch(error => {
     console.error("Error adding annotations:", error);
-    ElMessage.error("添加标注失败");
+    ElMessage.error('添加标注失败');
   });
 }
+
 
 // Watch for changes in label
 watch(() => selectedShape.value?.label, (newVal) => {
@@ -316,13 +307,19 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
   }
 });
 
+// 监听多边形变数变化
+watch(polygonSides, (newVal) => {
+  instance.polygonSides = newVal;
+  console.log("Polygon sides updated to:", newVal);
+});
+
 </script>
 
 <template>
   <div class="common-layout">
     <el-container>
       <el-header style="margin-left: 200px;">
-        <div style="margin-top: 30px;">
+        <div class="button-container">
           <el-button @click="change(1)" :type="createType === 1 ? 'primary' : 'default'">矩形</el-button>
           <el-button @click="change(2)" :type="createType === 2 ? 'primary' : 'default'">自定义多边形</el-button>
           <el-button @click="change(3)" :type="createType === 3 ? 'primary' : 'default'">点</el-button>
@@ -342,6 +339,7 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
             </el-icon>
             AI
           </el-button>
+          <el-input-number v-model="polygonSides" :min="15" label="多边形边数" style="margin-left: 10px;" />
         </div>
       </el-header>
       <el-container>
@@ -409,6 +407,8 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
 
 .box {
   display: flex;
+  justify-content: center;
+  /* 水平居中 */
 }
 
 .container {
@@ -468,4 +468,15 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
   /* 卡片悬停时的阴影效果 */
 }
 
+.button-container {
+  display: flex;
+  justify-content: center;
+  /* 水平居中 */
+  align-items: center;
+  /* 垂直居中 */
+  margin-top: 30px;
+  /* 顶部间距 */
+  gap: 10px;
+  /* 按钮之间的间距 */
+}
 </style>
