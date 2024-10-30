@@ -9,7 +9,6 @@ import { FullScreen, Hide, Pointer, Upload, Star } from "@element-plus/icons-vue
 
 let instance;
 const route = useRoute();
-const router = useRouter(); // 使用 useRouter
 const imagePath = ref("");
 const imageId = ref(route.query.imageId);
 const imageName = ref("");
@@ -25,6 +24,7 @@ const templateName = ref(""); // 模板名
 const isHidden = ref(false);
 // 定义createType，用于追踪当前绘制类型
 const createType = ref(0);
+const polygonSides = ref(20); // 默认多边形的边数为20
 
 let saveHistoryTimeout = null; // 保存历史记录的防抖定时器
 
@@ -256,7 +256,10 @@ function applyTemplate(template) {
 // 添加标注到图片
 function autoAddAnnotation() {
   console.log("Adding annotations to image", annotations.value);
-  autoAnnotation(encodeURIComponent(JSON.stringify(annotations.value))).then(response => {
+  autoAnnotation(
+      encodeURIComponent(JSON.stringify(annotations.value)),
+      polygonSides.value // 传入 polygonSides 参数
+  ).then(response => {
     if (response && response.data) {
       console.log("Full response:", response);
 
@@ -278,7 +281,14 @@ function autoAddAnnotation() {
         console.log("Annotations added:", data);
         annotations.value = data;
         instance.setData(annotations.value);
-        ElMessage.success("标注已成功添加");
+
+        // 计算并输出最后一个标注的坐标点数量
+        const lastAnnotation = annotations.value[annotations.value.length - 1];
+        let numberOfPoints;
+        if (lastAnnotation && lastAnnotation.coor) {
+          numberOfPoints = lastAnnotation.coor.length;
+        }
+        ElMessage.success("标注已成功添加，" + "顶点共" + numberOfPoints + "个");
       }
     }
   }).catch(error => {
@@ -316,13 +326,18 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
   }
 });
 
+// 监听多边形变数变化
+watch(polygonSides, (newVal) => {
+  instance.polygonSides = newVal;
+  console.log("Polygon sides updated to:", newVal);
+});
 </script>
 
 <template>
   <div class="common-layout">
     <el-container>
       <el-header style="margin-left: 200px;">
-        <div style="margin-top: 30px;">
+        <div style="margin-top: 30px; margin-left: 65px;">
           <el-button @click="change(1)" :type="createType === 1 ? 'primary' : 'default'">矩形</el-button>
           <el-button @click="change(2)" :type="createType === 2 ? 'primary' : 'default'">自定义多边形</el-button>
           <el-button @click="change(3)" :type="createType === 3 ? 'primary' : 'default'">点</el-button>
@@ -342,6 +357,7 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
             </el-icon>
             AI
           </el-button>
+          <el-input-number v-model="polygonSides" :min="15" label="多边形边数" style="margin-left: 10px;" />
         </div>
       </el-header>
       <el-container>
@@ -409,6 +425,8 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
 
 .box {
   display: flex;
+  justify-content: center;
+  /* 水平居中 */
 }
 
 .container {
@@ -468,4 +486,15 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
   /* 卡片悬停时的阴影效果 */
 }
 
+.button-container {
+  display: flex;
+  justify-content: center;
+  /* 水平居中 */
+  align-items: center;
+  /* 垂直居中 */
+  margin-top: 30px;
+  /* 顶部间距 */
+  gap: 10px;
+  /* 按钮之间的间距 */
+}
 </style>
