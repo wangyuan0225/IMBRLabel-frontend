@@ -1,9 +1,9 @@
 <script setup>
-import {onMounted, ref, onBeforeUnmount, watch} from "vue";
-import {useRoute, useRouter} from "vue-router"; // 引入 useRouter
+import { onMounted, ref, onBeforeUnmount, watch } from "vue";
+import { useRoute, useRouter } from "vue-router"; // 引入 useRouter
 import CanvasSelect from "canvas-select";
 
-import { addAnnotation, autoAnnotation, addAnnotationToImage, exportAnnotations, getTemplates, getImageDetails } from "@/api/annotation.js";
+import { addAnnotation, autoAnnotation, fullAutoAnnotation, addAnnotationToImage, exportAnnotations, getTemplates, getImageDetails } from "@/api/annotation.js";
 import { ElMessage } from "element-plus";
 import { FullScreen, Hide, Pointer, Upload, Star } from "@element-plus/icons-vue";
 
@@ -253,12 +253,12 @@ function applyTemplate(template) {
   }
 }
 
-// 添加标注到图片
+// 半自动添加标注到图片
 function autoAddAnnotation() {
   console.log("Adding annotations to image", annotations.value);
   autoAnnotation(
-      encodeURIComponent(JSON.stringify(annotations.value)),
-      polygonSides.value // 传入 polygonSides 参数
+    encodeURIComponent(JSON.stringify(annotations.value)),
+    polygonSides.value // 传入 polygonSides 参数
   ).then(response => {
     if (response && response.data) {
       console.log("Full response:", response);
@@ -297,6 +297,42 @@ function autoAddAnnotation() {
   });
 }
 
+// 全自动添加标注到图片
+function fullAutoAddAnnotation() {
+  console.log("Adding annotations to image", annotations.value);
+  fullAutoAnnotation(encodeURIComponent(JSON.stringify(annotations.value)))
+    .then(response => {
+      if (response && response.data) {
+        console.log("Full response:", response);
+
+        let data;
+        if (typeof response.data === "string") {
+          try {
+            data = JSON.parse(response.data);
+            console.log("Parsed response data:", data);
+          } catch (error) {
+            console.error("Failed to parse response data:", error);
+            ElMessage.error("解析响应数据失败");
+            return;
+          }
+        } else {
+          data = response.data;
+        }
+
+        if (data) {
+          console.log("Annotations added:", data);
+          annotations.value = data;
+          instance.setData(annotations.value);
+
+          ElMessage.success("标注已成功添加");
+        }
+      }
+    }).catch(error => {
+      console.error("Error adding annotations:", error);
+      ElMessage.error("添加标注失败");
+    });
+}
+
 // Watch for changes in label
 watch(() => selectedShape.value?.label, (newVal) => {
   if (selectedShape.value) {
@@ -329,6 +365,7 @@ watch(() => selectedShape.value?.lineWidth, (newVal) => {
 // 监听多边形变数变化
 watch(polygonSides, (newVal) => {
   instance.polygonSides = newVal;
+  instance.update();
   console.log("Polygon sides updated to:", newVal);
 });
 </script>
@@ -351,13 +388,20 @@ watch(polygonSides, (newVal) => {
           <el-button @click="exportXml()">导出为xml</el-button>
           <el-button @click="exportCsv()">导出为csv</el-button>
           <el-button type="danger" @click="autoAddAnnotation()"
-            style="font-size: 24px; background-color: darkorange; color: white;">
+            style="font-size: 20px; background-color: darkorange; color: white;">
             <el-icon>
               <Star />
             </el-icon>
-            AI
+            半自动AI
           </el-button>
           <el-input-number v-model="polygonSides" :min="15" label="多边形边数" style="margin-left: 10px;" />
+          <el-button type="danger" @click="fullAutoAddAnnotation()"
+            style="font-size: 20px; margin-left: 10px; background-color: darkgreen; color: white;">
+            <el-icon>
+              <Star />
+            </el-icon>
+            全自动AI
+          </el-button>
         </div>
       </el-header>
       <el-container>

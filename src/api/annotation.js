@@ -31,7 +31,7 @@ export function exportAnnotations(imageId, type) {
     });
 }
 
-// 根据坐标添加标注
+// 半自动根据坐标添加标注
 export function autoAnnotation(annotations, polygonSides) {
     return request.patch("/annotations/auto", {
         annotations: annotations,
@@ -42,6 +42,18 @@ export function autoAnnotation(annotations, polygonSides) {
         }
     });
 }
+
+// 全自动根据坐标添加标注
+export function fullAutoAnnotation(annotations) {
+    return request.patch("/annotations/fullauto", {
+        annotations: annotations
+    }, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+}
+
 
 export function getImageDetails(imageId) {
     return request.get("/annotations/details", {
