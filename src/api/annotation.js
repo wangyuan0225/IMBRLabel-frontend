@@ -32,10 +32,11 @@ export function exportAnnotations(imageId, type) {
 }
 
 // 半自动根据坐标添加标注
-export function autoAnnotation(annotations, polygonSides) {
+export function autoAnnotation(annotations, polygonSides, imageId) {
     return request.patch("/annotations/auto", {
         annotations: annotations,
-        polygonSides: polygonSides
+        polygonSides: polygonSides,
+        imageId: imageId
     }, {
         headers: {
             'Content-Type': 'application/json'
@@ -44,9 +45,11 @@ export function autoAnnotation(annotations, polygonSides) {
 }
 
 // 全自动根据坐标添加标注
-export function fullAutoAnnotation(annotations) {
+export function fullAutoAnnotation(annotations, polygonSides, imageId) {
     return request.patch("/annotations/fullauto", {
-        annotations: annotations
+        annotations: annotations,
+        polygonSides: polygonSides,
+        imageId: imageId
     }, {
         headers: {
             'Content-Type': 'application/json'

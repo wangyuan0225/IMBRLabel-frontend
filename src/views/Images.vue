@@ -1,50 +1,78 @@
 <script setup>
-import {ref, onMounted} from "vue";
-import {deleteImageById, getImageList, uploadImage} from "@/api/images.js";
-import {ElMessage, ElMessageBox} from "element-plus";
+import { ref, onMounted } from "vue";
+import { deleteImageById, getImageList, uploadImage } from "@/api/images.js";
+import { ElMessage, ElMessageBox } from "element-plus";
 import router from "@/router/index.js";
-import {Delete} from "@element-plus/icons-vue";
+import { Delete } from "@element-plus/icons-vue";
 
 const imageList = ref([]);
 
 // 获取图片列表
 const fetchImages = async () => {
-  const result = await getImageList();
-  if (result.code === 0) {
-    imageList.value = result.data.map(image => ({
-      ...image,
-      path: `http://localhost:8080/images/${image.path.replace(/\\/g, "/")}`
-    }));
-  } else {
-    ElMessage.error(result.message ? result.message : "获取图片失败");
-  }
-  if (imageList.value.length === 0) {
-    ElMessage.info("暂无图片，请上传");
+  try {
+    const result = await getImageList();
+    if (result.code === 0) {
+      imageList.value = result.data.map(image => ({
+        ...image,
+        path: `http://localhost:8080/images/${image.path.replace(/\\/g, "/")}`
+      }));
+    } else {
+      ElMessage.error(result.message || "获取图片失败");
+    }
+    if (imageList.value.length === 0) {
+      ElMessage.info("暂无图片，请上传");
+    }
+  } catch (error) {
+    ElMessage.error("获取图片时出现错误");
+    console.error(error);
   }
 };
 
-const beforeUpload = async (file) => {
+
+// 上传单个图片
+const uploadSingleFile = async (file) => {
   try {
     const result = await uploadImage(file);
     if (result.code === 0) {
-      ElMessage.success("图片上传成功");
-      await fetchImages();
+      ElMessage.success(`图片 ${file.name} 上传成功`);
     } else {
-      ElMessage.error(result.message ? result.message : "图片上传失败");
+      ElMessage.error(result.message ? result.message : `文件 ${file.name} 上传失败`);
     }
+    await fetchImages(); // 重新获取图片列表
   } catch (error) {
     ElMessage.error("上传过程中出现错误");
   }
-  return false;
 };
 
+// 上传文件夹
+const uploadFolder = async (files) => {
+  // 清空之前的图片列表
+  imageList.value = [];
+  try {
+    const uploadPromises = Array.from(files).map(async (file) => {
+      const result = await uploadImage(file);
+      if (result.code === 0) {
+        ElMessage.success(`文件 ${file.name} 上传成功`);
+      } else {
+        ElMessage.error(result.message ? result.message : `文件 ${file.name} 上传失败`);
+      }
+    });
+
+    await Promise.all(uploadPromises);
+    await fetchImages(); // 重新获取图片列表
+  } catch (error) {
+    ElMessage.error("上传过程中出现错误");
+  }
+};
+
+
+
+// 编辑图片
 const editImage = (image) => {
-  console.log("edit image", image);
-  // 使用参数传递图片路径
   router.push({
     name: "Annotation",
     query: {
-      imageId: image.id // 仅传递 imageId
+      imageId: image.id
     }
   });
 };
@@ -52,27 +80,26 @@ const editImage = (image) => {
 // 删除图片
 const deleteImage = async (id) => {
   ElMessageBox.confirm(
-      "这将永久删除该图片及其标注信息，是否继续？",
-      "警告！",
-      {
-        confirmButtonText: "确认",
-        cancelButtonText: "取消",
-        type: "warning"
+    "这将永久删除该图片及其标注信息，是否继续？",
+    "警告！",
+    {
+      confirmButtonText: "确认",
+      cancelButtonText: "取消",
+      type: "warning"
+    }
+  ).then(async () => {
+    try {
+      const result = await deleteImageById(id);
+      if (result.code === 0) {
+        ElMessage.success("图片删除成功");
+        await fetchImages();
+      } else {
+        ElMessage.error(result.message ? result.message : "图片删除失败");
       }
-  )
-      .then(async () => {
-        try {
-          const result = await deleteImageById(id);
-          if (result.code === 0) {
-            ElMessage.success("图片删除成功");
-            await fetchImages();
-          } else {
-            ElMessage.error(result.message ? result.message : "图片删除失败");
-          }
-        } catch (error) {
-          ElMessage.error("删除图片时出错");
-        }
-      })
+    } catch (error) {
+      ElMessage.error("删除图片时出错");
+    }
+  });
 };
 
 // 组件挂载时获取图片列表
@@ -84,16 +111,19 @@ onMounted(fetchImages);
     <el-container>
       <el-main>
         <div class="upload-section">
-          <el-upload :before-upload="beforeUpload">
+          <el-upload :before-upload="uploadSingleFile" accept="image/*">
             <el-button type="primary">上传图片</el-button>
+          </el-upload>
+          <el-upload :before-upload="uploadFolder" webkitdirectory multiple>
+            <el-button type="primary">上传文件夹</el-button>
           </el-upload>
         </div>
         <div class="gallery">
           <div v-for="(image, index) in imageList" :key="index" class="thumbnail">
             <div class="image-container">
-              <img :src="image.path" :alt="image.name" @click="editImage(image)"/>
+              <img :src="image.path" :alt="image.name" @click="editImage(image)" />
               <el-button size="small" type="danger" :icon="Delete" plain circle @click="deleteImage(image.id)"
-                         class="delete-button"></el-button>
+                class="delete-button"></el-button>
             </div>
           </div>
         </div>
@@ -111,8 +141,13 @@ onMounted(fetchImages);
   margin: 0;
 }
 
+.upload-section el-button:first-child {
+  margin-right: 20px;
+}
+
 .upload-section {
   display: flex;
+  gap: 20px;
   justify-content: flex-end;
   margin-bottom: 20px;
 }
@@ -120,8 +155,8 @@ onMounted(fetchImages);
 .gallery {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px; /* 调整间距 */
-  align-items: flex-start; /* 确保图片紧贴顶部 */
+  gap: 5px;
+  align-items: flex-start;
 }
 
 .thumbnail {
@@ -136,7 +171,7 @@ onMounted(fetchImages);
 .image-container {
   position: relative;
   width: 100%;
-  padding-top: 100%; /* 维持1:1比例 */
+  padding-top: 100%;
   background-color: #f0f0f0;
 }
 

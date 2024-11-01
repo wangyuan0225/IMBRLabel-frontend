@@ -9,9 +9,12 @@ import { FullScreen, Hide, Pointer, Upload, Star } from "@element-plus/icons-vue
 
 let instance;
 const route = useRoute();
+const router = useRouter();
 const imagePath = ref("");
 const imageId = ref(route.query.imageId);
 const imageName = ref("");
+const previousImageId = ref(null);
+const nextImageId = ref(null);
 
 // 初始化已有的标注信息
 let outputRef = ref(null);
@@ -35,6 +38,9 @@ onMounted(() => {
     imagePath.value = response.data.path;
     imageName.value = response.data.name;
     annotations.value = response.data.annotations;
+
+    previousImageId.value = response.previousImageId;
+    nextImageId.value = response.nextImageId;
 
     console.log("imagePath.value", imagePath.value);
 
@@ -333,6 +339,24 @@ function fullAutoAddAnnotation() {
     });
 }
 
+// 处理上一张和下一张的导航
+function goToPreviousImage() {
+  if (previousImageId.value) {
+    router.push({ query: { imageId: previousImageId.value } });
+  }
+}
+
+function goToNextImage() {
+  if (nextImageId.value) {
+    router.push({ query: { imageId: nextImageId.value } });
+  }
+}
+
+function goToImage() {
+  router.push('/images');
+}
+
+
 // Watch for changes in label
 watch(() => selectedShape.value?.label, (newVal) => {
   if (selectedShape.value) {
@@ -405,8 +429,18 @@ watch(polygonSides, (newVal) => {
         </div>
       </el-header>
       <el-container>
-        <el-aside width="50px">
+        <el-aside width="100px"
+          style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;margin-left: 100px;margin-top: 300px;">
+          <el-button @click="goToPreviousImage" icon="el-icon-arrow-left" size="large"
+            style="margin: 10px 0; width: 80px; height: 80px;">上一张</el-button>
+          <el-button @click="goToNextImage" icon="el-icon-arrow-right" size="large"
+            style="margin: 10px 0; width: 80px; height: 80px;">下一张</el-button>
+          <el-button @click="goToImage" type="primary" size="large"
+            style="margin: 10px 0; width: 80px; height: 80px;">返回</el-button>
         </el-aside>
+
+
+
         <el-main>
           <div class="box">
             <div class="left">
