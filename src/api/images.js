@@ -5,16 +5,26 @@ export const getImageList = () => {
     return request.get("/images");
 }
 
-// 上传图片
+// 上传图片/文件夹
 export const uploadImage = (imageFile) => {
     let formData = new FormData();
-    formData.append("file", imageFile);
+
+    // 判断是单个文件还是多个文件
+    if (imageFile instanceof File) {
+        formData.append("file", imageFile);
+    } else {
+        Array.from(imageFile).forEach(file => {
+            formData.append("files", file);
+        });
+    }
+
     return request.post("/images", formData, {
         headers: {
             "Content-Type": "multipart/form-data"
         }
     });
 }
+
 
 // 删除图片
 export function deleteImageById(id) {
