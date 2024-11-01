@@ -45,11 +45,11 @@ export function autoAnnotation(annotations, polygonSides, imageId) {
 }
 
 // 全自动根据坐标添加标注
-export function fullAutoAnnotation(annotations, polygonSides, imageId) {
+export function fullAutoAnnotation(annotations, polygonSides, selectedId) {
     return request.patch("/annotations/fullauto", {
         annotations: annotations,
         polygonSides: polygonSides,
-        imageId: imageId
+        selectedId: selectedId
     }, {
         headers: {
             'Content-Type': 'application/json'

@@ -306,7 +306,14 @@ function autoAddAnnotation() {
 // 全自动添加标注到图片
 function fullAutoAddAnnotation() {
   console.log("Adding annotations to image", annotations.value);
-  fullAutoAnnotation(encodeURIComponent(JSON.stringify(annotations.value)))
+  const selectedId = selectedshape.value
+    ? parseInt(selectedshape.value.labe)
+    : null;
+  fullAutoAnnotation(
+    encodeURIComponent(JSON.stringify(annotations.value)),
+    polygonsides.value,//传入polygonsides 参数
+    selectedId
+  )
     .then(response => {
       if (response && response.data) {
         console.log("Full response:", response);
@@ -342,15 +349,30 @@ function fullAutoAddAnnotation() {
 // 处理上一张和下一张的导航
 function goToPreviousImage() {
   if (previousImageId.value) {
-    router.push({ query: { imageId: previousImageId.value } });
+    ElMessageBox.confirm('您有未保存的更改，确定要切换到上一张吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+      .then(() => {
+        router.push({ query: { imageId: previousImageId.value } });
+      });
   }
 }
 
 function goToNextImage() {
   if (nextImageId.value) {
-    router.push({ query: { imageId: nextImageId.value } });
+    ElMessageBox.confirm('您有未保存的更改，确定要切换到下一张吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+      .then(() => {
+        router.push({ query: { imageId: nextImageId.value } });
+      });
   }
 }
+
 
 function goToImage() {
   router.push('/images');
