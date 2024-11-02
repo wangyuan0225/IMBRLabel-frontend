@@ -28,7 +28,6 @@ const fetchImages = async () => {
   }
 };
 
-
 // 上传单个图片
 const uploadSingleFile = async (file) => {
   try {
@@ -48,6 +47,8 @@ const uploadSingleFile = async (file) => {
 const uploadFolder = async (files) => {
   // 清空之前的图片列表
   imageList.value = [];
+  console.log('Selected files:', files);
+
   try {
     const uploadPromises = Array.from(files).map(async (file) => {
       const result = await uploadImage(file);
@@ -64,8 +65,6 @@ const uploadFolder = async (files) => {
     ElMessage.error("上传过程中出现错误");
   }
 };
-
-
 
 // 编辑图片
 const editImage = (image) => {
@@ -114,9 +113,9 @@ onMounted(fetchImages);
           <el-upload :before-upload="uploadSingleFile" accept="image/*">
             <el-button type="primary">上传图片</el-button>
           </el-upload>
-          <el-upload :before-upload="uploadFolder" webkitdirectory multiple>
-            <el-button type="primary">上传文件夹</el-button>
-          </el-upload>
+          <input type="file" webkitdirectory multiple @change="(e) => uploadFolder(e.target.files)"
+            style="display: none;" ref="folderInput">
+          <el-button type="primary" @click="$refs.folderInput.click()">上传文件夹</el-button>
         </div>
         <div class="gallery">
           <div v-for="(image, index) in imageList" :key="index" class="thumbnail">
