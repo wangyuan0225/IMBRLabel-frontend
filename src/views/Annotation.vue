@@ -353,27 +353,53 @@ function fullAutoAddAnnotation() {
 // 处理上一张和下一张的导航
 function goToPreviousImage() {
   if (previousImageId.value) {
-    ElMessageBox.confirm('您有未保存的更改，确定要切换到上一张吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    ElMessageBox.confirm('您有未保存的更改，是否先保存再切换到上一张？', '提示', {
+      confirmButtonText: '保存跳转',
+      cancelButtonText: '不保存跳转',
       type: 'warning',
     })
       .then(() => {
+        // 用户选择确定，保存更改并跳转
+        update().then(() => {
+          router.push({ query: { imageId: previousImageId.value } }).then(() => location.reload());
+        }).catch(() => {
+          // 保存失败，不跳转
+          ElMessage.error("保存失败，无法跳转到上一张图片");
+        });
+      })
+      .catch(() => {
+        // 用户选择取消，不保存直接跳转
         router.push({ query: { imageId: previousImageId.value } }).then(() => location.reload());
       });
+  } else {
+    // 如果是第一张图片
+    ElMessage.warning("已经是第一张图片！");
   }
 }
 
 function goToNextImage() {
   if (nextImageId.value) {
-    ElMessageBox.confirm('您有未保存的更改，确定要切换到下一张吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    ElMessageBox.confirm('您有未保存的更改，是否先保存再切换到下一张？', '提示', {
+      confirmButtonText: '保存跳转',
+      cancelButtonText: '不保存跳转',
       type: 'warning',
     })
       .then(() => {
+        // 用户选择确定，保存更改并跳转
+        update().then(() => {
+          router.push({ query: { imageId: nextImageId.value } }).then(() => location.reload());
+        }).catch(() => {
+          // 保存失败，不跳转
+          ElMessage.error("保存失败，无法跳转到下一张图片");
+        });
+      })
+      .catch(() => {
+        // 用户选择取消，不保存直接跳转
         router.push({ query: { imageId: nextImageId.value } }).then(() => location.reload());
       });
+  } else {
+    // 如果是最后一张图片
+    ElMessage.warning("已经是最后一张图片！");
   }
 }
 
@@ -423,93 +449,81 @@ watch(polygonSides, (newVal) => {
 <template>
   <div class="common-layout">
     <el-container>
-      <el-header style="margin-left: 200px;">
-        <div style="margin-top: 30px; margin-left: 65px;">
+      <el-header>
+        <div class="header-buttons" style="border-color: #c0c0c0;">
           <el-button @click="change(1)" :type="createType === 1 ? 'primary' : 'default'">矩形</el-button>
           <el-button @click="change(2)" :type="createType === 2 ? 'primary' : 'default'">自定义多边形</el-button>
           <el-button @click="change(3)" :type="createType === 3 ? 'primary' : 'default'">点</el-button>
           <el-button @click="change(4)" :type="createType === 4 ? 'primary' : 'default'">线</el-button>
           <el-button @click="change(5)" :type="createType === 5 ? 'primary' : 'default'">圆</el-button>
-          <el-button @click="change(0)" :type="createType === 0 ? 'primary' : 'default'" :icon="Pointer"></el-button>
+          <el-button :icon="Pointer" @click="change(0)"></el-button>
           <el-button :icon="FullScreen" @click="fitting()"></el-button>
-          <el-button @click="onFocus()" :icon="Hide" :type="isHidden ? 'primary' : 'default'"></el-button>
-          <el-button :icon="Upload" type="success" @click="update()"></el-button>
+          <el-button :icon="Hide" @click="onFocus()" :type="isHidden ? 'primary' : 'default'"></el-button>
+          <el-button type="success" @click="update()"><el-icon :icon="Upload" />保存</el-button>
           <el-button @click="exportJson()">导出为json</el-button>
           <el-button @click="exportXml()">导出为xml</el-button>
           <el-button @click="exportCsv()">导出为csv</el-button>
-          <el-button type="danger" @click="autoAddAnnotation()"
-            style="font-size: 20px; background-color: darkorange; color: white;">
+          <el-button type="danger" @click="autoAddAnnotation()">
             <el-icon>
               <Star />
-            </el-icon>
-            半自动AI
+            </el-icon> 半自动AI
           </el-button>
           <el-input-number v-model="polygonSides" :min="15" label="多边形边数" style="margin-left: 10px;" />
-          <el-button type="danger" @click="fullAutoAddAnnotation()"
-            style="font-size: 20px; margin-left: 10px; background-color: darkgreen; color: white;">
-            <el-icon>
-              <Star />
-            </el-icon>
-            全自动AI
-          </el-button>
+          <el-button type="danger" @click="fullAutoAddAnnotation()">全自动AI</el-button>
         </div>
       </el-header>
+
       <el-container>
         <el-aside width="100px"
-          style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;margin-left: 100px;margin-top: 300px;">
+          style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; margin-left: 100px; margin-top: 30px;">
           <el-button @click="goToPreviousImage" icon="el-icon-arrow-left" size="large"
-            style="margin: 10px 0; width: 80px; height: 80px;">上一张</el-button>
+            style="margin: 10px 0; width: 80px; height: 80px; background-color: #f5f5f5;">
+            上一张
+          </el-button>
           <el-button @click="goToNextImage" icon="el-icon-arrow-right" size="large"
-            style="margin: 10px 0; width: 80px; height: 80px;">下一张</el-button>
+            style="margin: 10px 0; width: 80px; height: 80px; background-color: #f5f5f5;">
+            下一张
+          </el-button>
           <el-button @click="goToImage" type="primary" size="large"
-            style="margin: 10px 0; width: 80px; height: 80px;">返回</el-button>
+            style="margin: 10px 0; width: 80px; height: 80px; background-color: #409eff; color: white;">
+            返回
+          </el-button>
         </el-aside>
 
 
-
         <el-main>
-          <div class="box">
-            <div class="left">
-              <canvas class="container"></canvas>
-            </div>
-            <div class="right">
-              <div v-if="selectedShape">
-                <h3 class="center-title">编辑标注属性值</h3>
-                <el-form label-width="100px" class="left-form">
-                  <el-form-item label="标签名称:">
-                    <el-input v-model="selectedShape.label" clearable style="width: 150px;" />
-                  </el-form-item>
+          <div class="canvas-container">
+            <canvas class="container"></canvas>
+            <div class="right-panel" v-if="selectedShape">
+              <h3>编辑标注属性值</h3>
+              <el-form label-width="100px">
+                <el-form-item label="标签名称:">
+                  <el-input v-model="selectedShape.label" clearable />
+                </el-form-item>
+                <el-form-item label="边线颜色:">
+                  <el-color-picker v-model="selectedShape.strokeStyle" show-alpha />
+                </el-form-item>
+                <el-form-item label="填充颜色:">
+                  <el-color-picker v-model="selectedShape.fillStyle" show-alpha />
+                </el-form-item>
+                <el-form-item label="边线宽度:">
+                  <el-input-number v-model="selectedShape.lineWidth" />
+                </el-form-item>
+                <el-form-item label="模板名称:">
+                  <el-input v-model="templateName" clearable>
+                    <template #append>
+                      <el-button @click="saveAsTemplate()" :icon="Upload" />
+                    </template>
+                  </el-input>
+                </el-form-item>
+              </el-form>
 
-                  <el-form-item label="边线颜色:">
-                    <el-color-picker v-model="selectedShape.strokeStyle" show-alpha />
-                  </el-form-item>
-
-                  <el-form-item label="填充颜色:">
-                    <el-color-picker v-model="selectedShape.fillStyle" show-alpha />
-                  </el-form-item>
-
-                  <el-form-item label="边线宽度:">
-                    <el-input-number v-model="selectedShape.lineWidth" />
-                  </el-form-item>
-
-                  <el-form-item label="模板名称:">
-                    <el-input v-model="templateName" clearable style="width: 200px">
-                      <template #append>
-                        <el-button @click="saveAsTemplate()" :icon="Upload" />
-                      </template>
-                    </el-input>
-                  </el-form-item>
-                </el-form>
-
-                <h3 class="center-title">模板列表</h3>
-                <el-list>
-                  <el-list-item v-for="template in templates" :key="template.id" @click="applyTemplate(template)">
-                    <el-card>
-                      <div>{{ template.name }}</div>
-                    </el-card>
-                  </el-list-item>
-                </el-list>
-              </div>
+              <h3>模板列表</h3>
+              <el-list>
+                <el-list-item v-for="template in templates" :key="template.id" @click="applyTemplate(template)">
+                  <el-card>{{ template.name }}</el-card>
+                </el-list-item>
+              </el-list>
             </div>
           </div>
         </el-main>
@@ -522,51 +536,39 @@ watch(polygonSides, (newVal) => {
 .common-layout {
   background-color: white;
   min-height: 100vh;
-  /* 保证背景色铺满整个页面 */
   padding: 0;
-  margin: 0;
 }
 
-.box {
+.header-buttons {
   display: flex;
-  justify-content: center;
-  /* 水平居中 */
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #f5f5f5;
+}
+
+.canvas-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
 }
 
 .container {
   background-color: #ccc;
-  width: 1200px;
-  /* 确保画布宽度适应页面 */
+  width: 70%;
   height: 800px;
 }
 
-.right {
+.right-panel {
+  max-width: 300px;
   margin-left: 20px;
-  max-width: 400px;
-  /* 限制右侧面板的最大宽度 */
-  transition: box-shadow 0.3s;
-  /* 添加过渡效果 */
-}
-
-.right:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  /* 悬停时的阴影效果 */
-}
-
-.center-title {
-  text-align: center;
-  margin-bottom: 15px;
-}
-
-.left-form {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  /* 确保左对齐 */
+  padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
 }
 
 .el-form-item {
-  width: 100%;
   margin-bottom: 15px;
 }
 
@@ -576,29 +578,5 @@ watch(polygonSides, (newVal) => {
 
 .el-list-item:hover {
   background-color: #f0f0f0;
-}
-
-.el-card {
-  width: 100%;
-  margin: 5px 0;
-  transition: background-color 0.2s;
-}
-
-.el-card:hover {
-  background-color: #e0e0e0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  /* 卡片悬停时的阴影效果 */
-}
-
-.button-container {
-  display: flex;
-  justify-content: center;
-  /* 水平居中 */
-  align-items: center;
-  /* 垂直居中 */
-  margin-top: 30px;
-  /* 顶部间距 */
-  gap: 10px;
-  /* 按钮之间的间距 */
 }
 </style>
