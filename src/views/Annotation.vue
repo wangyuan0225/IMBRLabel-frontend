@@ -353,20 +353,20 @@ function fullAutoAddAnnotation() {
 // 处理上一张和下一张的导航
 function goToPreviousImage() {
   if (previousImageId.value) {
-    ElMessage.confirm('您有未保存的更改，确定要切换到上一张吗？', '提示', {
+    ElMessageBox.confirm('您有未保存的更改，确定要切换到上一张吗？', '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning',
     })
       .then(() => {
-        router.push({ query: { imageId: prevImageId.value } }).then(() => location.reload());
+        router.push({ query: { imageId: previousImageId.value } }).then(() => location.reload());
       });
   }
 }
 
 function goToNextImage() {
   if (nextImageId.value) {
-    ElMessage.confirm('您有未保存的更改，确定要切换到下一张吗？', '提示', {
+    ElMessageBox.confirm('您有未保存的更改，确定要切换到下一张吗？', '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning',
