@@ -4,7 +4,7 @@ import { useRoute, useRouter } from "vue-router"; // 引入 useRouter
 import CanvasSelect from "canvas-select";
 
 import { addAnnotation, autoAnnotation, fullAutoAnnotation, addAnnotationToImage, exportAnnotations, getTemplates, getImageDetails } from "@/api/annotation.js";
-import { ElMessage } from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 import { FullScreen, Hide, Pointer, Upload, Star } from "@element-plus/icons-vue";
 
 let instance;
@@ -39,10 +39,12 @@ onMounted(() => {
     imageName.value = response.data.name;
     annotations.value = response.data.annotations;
 
-    previousImageId.value = response.previousImageId;
-    nextImageId.value = response.nextImageId;
+    previousImageId.value = response.data.previousImageId;
+    nextImageId.value = response.data.nextImageId;
 
     console.log("imagePath.value", imagePath.value);
+    console.log("previousImageId.value", previousImageId.value);
+    console.log("nextImageId.value", nextImageId.value);
 
     // 初始化 CanvasSelect 实例
     const fullImagePath = `http://localhost:8080/images/${imagePath.value}`;
@@ -264,7 +266,8 @@ function autoAddAnnotation() {
   console.log("Adding annotations to image", annotations.value);
   autoAnnotation(
     encodeURIComponent(JSON.stringify(annotations.value)),
-    polygonSides.value // 传入 polygonSides 参数
+    polygonSides.value, // 传入 polygonSides 参数
+    imageId.value
   ).then(response => {
     if (response && response.data) {
       console.log("Full response:", response);
@@ -306,12 +309,13 @@ function autoAddAnnotation() {
 // 全自动添加标注到图片
 function fullAutoAddAnnotation() {
   console.log("Adding annotations to image", annotations.value);
-  const selectedId = selectedshape.value
-    ? parseInt(selectedshape.value.labe)
+  const selectedId = selectedShape.value
+    ? parseInt(selectedShape.value.labe)
     : null;
   fullAutoAnnotation(
     encodeURIComponent(JSON.stringify(annotations.value)),
-    polygonsides.value,//传入polygonsides 参数
+    polygonSides.value,//传入 polygonSides 参数
+    imageId.value,
     selectedId
   )
     .then(response => {
