@@ -51,11 +51,12 @@ const uploadFolder = async (files) => {
 
   try {
     const uploadPromises = Array.from(files).map(async (file) => {
+      console.log('Uploading file:', file);
       const result = await uploadImage(file);
       if (result.code === 0) {
         ElMessage.success(`文件 ${file.name} 上传成功`);
       } else {
-        ElMessage.error(result.message ? result.message : `文件 ${file.name} 上传失败`);
+        ElMessage.error(result.message ? result.message : `文件 ${files.name} 上传失败`);
       }
     });
 

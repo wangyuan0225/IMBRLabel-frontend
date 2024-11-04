@@ -14,7 +14,7 @@ export const uploadImage = (imageFile) => {
         formData.append("file", imageFile);
     } else {
         Array.from(imageFile).forEach(file => {
-            formData.append("files", file);
+            formData.append("file", file);
         });
     }
 

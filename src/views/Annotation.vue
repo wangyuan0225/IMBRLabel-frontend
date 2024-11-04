@@ -459,7 +459,7 @@ watch(polygonSides, (newVal) => {
           <el-button :icon="Pointer" @click="change(0)"></el-button>
           <el-button :icon="FullScreen" @click="fitting()"></el-button>
           <el-button :icon="Hide" @click="onFocus()" :type="isHidden ? 'primary' : 'default'"></el-button>
-          <el-button type="success" @click="update()"><el-icon :icon="Upload" />保存</el-button>
+          <el-button :icon="Upload" type="success" @click="update()">保存</el-button>
           <el-button @click="exportJson()">导出为json</el-button>
           <el-button @click="exportXml()">导出为xml</el-button>
           <el-button @click="exportCsv()">导出为csv</el-button>
