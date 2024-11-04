@@ -1,28 +1,29 @@
 # imbr-label
 
-This template should help get you started developing with Vue 3 in Vite.
+## 后端项目
+https://github.com/wangyuan0225/IMBRLabel-backend
 
-## Recommended IDE Setup
+## 推荐的IDE初始化
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (并禁用 Vetur).
 
-## Customize configuration
+## 自定义配置
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+参考 [Vite 配置选项](https://vitejs.dev/config/).
 
-## Project Setup
+## 项目初始化
 
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### 编译与热更新部署
 
 ```sh
 npm run dev
 ```
 
-### Compile and Minify for Production
+### 编译并构建产品
 
 ```sh
 npm run build
