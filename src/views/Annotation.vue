@@ -310,7 +310,7 @@ function autoAddAnnotation() {
 function fullAutoAddAnnotation() {
   console.log("Adding annotations to image", annotations.value);
   const selectedId = selectedShape.value
-    ? parseInt(selectedShape.value.labe)
+    ? parseInt(selectedShape.value.label)
     : null;
   fullAutoAnnotation(
     encodeURIComponent(JSON.stringify(annotations.value)),
