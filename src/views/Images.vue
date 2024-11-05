@@ -14,7 +14,7 @@ const fetchImages = async () => {
     if (result.code === 0) {
       imageList.value = result.data.map(image => ({
         ...image,
-        path: `http://localhost:8080/images/${image.path.replace(/\\/g, "/")}`
+        path: `http://192.168.232.129:8080/images/${image.path.replace(/\\/g, "/")}`
       }));
     } else {
       ElMessage.error(result.message || "获取图片失败");

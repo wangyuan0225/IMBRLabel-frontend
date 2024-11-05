@@ -47,7 +47,7 @@ onMounted(() => {
     console.log("nextImageId.value", nextImageId.value);
 
     // 初始化 CanvasSelect 实例
-    const fullImagePath = `http://localhost:8080/images/${imagePath.value}`;
+    const fullImagePath = `http://192.168.232.129:8080/images/${imagePath.value}`;
     instance = new CanvasSelect(".container", fullImagePath);
     instance.labelMaxLen = 10;
 
